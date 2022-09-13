@@ -1,0 +1,5 @@
+atari-py
+opencv-python
+plotly
+torch
+tqdm
