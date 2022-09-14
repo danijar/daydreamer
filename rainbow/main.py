@@ -78,6 +78,7 @@ np.random.seed(args.seed)
 torch.manual_seed(np.random.randint(1, 10000))
 if torch.cuda.is_available() and not args.disable_cuda:
   args.device = torch.device('cuda')
+  print('OMG WERE USING CUDA>>> ITS A MIRCALE')
   torch.cuda.manual_seed(np.random.randint(1, 10000))
   torch.backends.cudnn.enabled = args.enable_cudnn
 else:
