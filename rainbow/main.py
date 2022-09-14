@@ -106,7 +106,6 @@ def save_memory(memory, memory_path, disable_bzip):
     with bz2.open(memory_path, 'wb') as zipped_pickle_file:
       pickle.dump(memory, zipped_pickle_file)
 
-,
 # Environment
 env = Env(args)
 env.train()

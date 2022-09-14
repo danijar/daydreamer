@@ -20,7 +20,8 @@ class Env:
     metadata = {}
 
     def __init__(self, outdir):
-        self.env = embodied.envs.load_single_env('ur5_real', length=100)
+        # self.env = embodied.envs.load_single_env('ur5_real', length=100)
+        self.env = embodied.envs.load_single_env('xarm_real', length=100)
         self.num_actions = self.env.act_space['action'].shape[0]
         self.logger = embodied.Logger(embodied.Counter(), [
             embodied.logger.TerminalOutput(),
@@ -30,6 +31,7 @@ class Env:
         self.score = 0
         self.length = 0
         self.r3m = load_r3m("resnet50")
+        self.r3m.cuda()
         self.r3m.eval()
 
     @property
@@ -47,14 +49,9 @@ class Env:
                     -np.inf, np.inf, (2048,), np.float)
                 continue
 
-            print(value)
             spaces[key] = gym.spaces.Box(
                 value.low, value.high, value.shape, value.dtype)
-        # print('-'*100)
-        # print({k: v.shape for k, v in spaces.items()})
-        # print('-'*100)
         return gym.spaces.Dict(spaces)
-        # return gym.spaces.Box((64, 64, 19), 0, 255
 
     @property
     def action_space(self):
@@ -69,8 +66,8 @@ class Env:
         del obs['reward']
         del obs['depth']
         with torch.no_grad():
-            obs['image'] = self.r3m(torch.tensor(obs['image'])[None])[0]
-        # obs = self._stack_obs(obs)
+            image = torch.tensor(obs['image'].copy()).cuda()
+            obs['image'] = self.r3m(image.permute(2,0,1)[None])[0].cpu().numpy()
         self.score = 0
         self.length = 0
         return obs
@@ -95,8 +92,8 @@ class Env:
         del obs['is_terminal']
         del obs['depth']
         with torch.no_grad():
-            obs['image'] = self.r3m(torch.tensor(obs['image'])[None])[0]
-        # obs = self._stack_obs(obs)
+            image = torch.tensor(obs['image'].copy()).cuda()
+            obs['image'] = self.r3m(image.permute(2,0,1)[None])[0].cpu().numpy()
         return obs, reward, done, {}
 
     def _stack_obs(self, obs):
